@@ -57,7 +57,8 @@ namespace Snap.LinFu
 
             var proxy = result.Container.GetService<IMasterProxy>();
 
-            if (!instance.IsDecorated(proxy.Configuration))
+            //Don't bother proxying anything if there are no interceptors
+            if (!instance.IsDecorated(proxy.Configuration) || proxy.Configuration.Interceptors.Count <= 0)
             {
                 return;
             }

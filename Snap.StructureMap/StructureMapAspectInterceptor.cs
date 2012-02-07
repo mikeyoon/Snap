@@ -54,8 +54,8 @@ namespace Snap.StructureMap {
         public object Process(object target, IContext context) 
         {
             var proxy = (MasterProxy)Container.GetInstance<IMasterProxy>();
-            
-            if(target.IsDecorated(proxy.Configuration))
+
+            if(proxy.Configuration.Interceptors.Count > 0 && target.IsDecorated(proxy.Configuration))
             {
                 return _proxyFactory.CreateProxy(target, proxy);
             }

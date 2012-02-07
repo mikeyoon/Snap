@@ -144,42 +144,46 @@ namespace Snap
         private static Attribute GetAttribute(Type targetType, MethodBase method, Type attributeType)
         {
             var key = GetMethodSignature(method, attributeType);
-            if (SignatureCache.ContainsKey(key))
+
+            lock (SignatureCache) //Has to be threadsafe
             {
-                return SignatureCache[key];
-            }
-
-            var classAttributes = (from attr in targetType.GetCustomAttributes(!targetType.IsInterface)
-                                   where attr.GetType().Equals(attributeType)
-                                   select attr).ToList();
-
-            if (classAttributes.Any())
-            {
-                var attribute = (ClassInterceptAttribute)classAttributes.First();
-
-                if (MatchesClassAttribute(attribute, method))
+                if (SignatureCache.ContainsKey(key))
                 {
+                    return SignatureCache[key];
+                }
+
+                var classAttributes = (from attr in targetType.GetCustomAttributes(!targetType.IsInterface)
+                                       where attr.GetType().Equals(attributeType)
+                                       select attr).ToList();
+
+                if (classAttributes.Any())
+                {
+                    var attribute = (ClassInterceptAttribute)classAttributes.First();
+
+                    if (MatchesClassAttribute(attribute, method))
+                    {
+                        SignatureCache.Add(key, attribute);
+                        return attribute;
+                    }
+                }
+
+                var attributes = (from attr in method.GetCustomAttributes(!targetType.IsInterface)
+                                  where attr.GetType().Equals(attributeType)
+                                  select attr).ToList();
+
+                if (attributes.Any())
+                {
+                    var attribute = (Attribute)attributes.First();
                     SignatureCache.Add(key, attribute);
                     return attribute;
                 }
-            }
+                else
+                {
+                    SignatureCache.Add(key, null);
+                }
 
-            var attributes = (from attr in method.GetCustomAttributes(!targetType.IsInterface)
-                             where attr.GetType().Equals(attributeType)
-                             select attr).ToList();
-
-            if (attributes.Any())
-            {
-                var attribute = (Attribute)attributes.First();
-                SignatureCache.Add(key, attribute);
-                return attribute;
+                return null;
             }
-            else
-            {
-                SignatureCache.Add(key, null);
-            }
-
-            return null;
         }
 
         private static bool MatchesClassAttribute(ClassInterceptAttribute attribute, MethodBase method)

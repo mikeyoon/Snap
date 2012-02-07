@@ -77,7 +77,7 @@ namespace Snap.Autofac
 
             var proxy = (MasterProxy)e.Context.Resolve(typeof(MasterProxy));
 
-            if (!e.Instance.IsDecorated(proxy.Configuration))
+            if (!e.Instance.IsDecorated(proxy.Configuration) || proxy.Configuration.Interceptors.Count <= 0)
             {
                 return;
             }

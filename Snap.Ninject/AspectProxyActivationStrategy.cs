@@ -48,7 +48,8 @@ namespace Snap.Ninject
                 var proxy = context.Kernel.Get<IMasterProxy>();
 
                 // Only build a proxy for decorated types
-                if (reference.Instance.IsDecorated(proxy.Configuration))
+                // Don't bother proxying anything if there are no interceptors
+                if (proxy.Configuration.Interceptors.Count > 0 && reference.Instance.IsDecorated(proxy.Configuration))
                 {
                     reference.Instance = _proxyFactory.CreateProxy(reference.Instance, proxy);
                 }

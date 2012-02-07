@@ -88,7 +88,7 @@ namespace Snap.StructureMap
 
             var name = target.GetType().FullName;
 
-            if (target.IsDecorated(proxy.Configuration) && !name.EndsWith("Proxy")) //Don't create proxies of proxies
+            if (proxy.Configuration.Interceptors.Count > 0 && target.IsDecorated(proxy.Configuration) && !name.EndsWith("Proxy")) //Don't create proxies of proxies
             {
                 return _proxyFactory.CreateProxy(target, proxy);
             }
