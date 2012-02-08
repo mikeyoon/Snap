@@ -61,6 +61,14 @@ namespace Snap
                 var types = new[] { type };
                 return types.FirstMatch(configuration.Namespaces);
             }
+            else
+            { 
+                //If the top level interface inherits from the baseclassinterface, then return the top one since that's more specific
+                var top = topLevelInterfaces.ToArray().FirstMatch(configuration.Namespaces);
+                var bi = baseClassInterfaces.ToArray().FirstMatch(configuration.Namespaces);
+                if (top != null && bi != null && top.GetInterfaces().Contains(bi))
+                    return top;
+            }
 
             return allInterfaces.FirstMatch(configuration.Namespaces);
         }
